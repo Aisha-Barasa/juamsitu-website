@@ -1,13 +1,19 @@
 import { Link } from 'react-router-dom';
-import {
-  Radar, Map, Sprout, FileBarChart, Briefcase, HeartHandshake, Trees,
-  Landmark, Globe2, Microscope, CalendarDays, UserPlus,
-} from 'lucide-react';
 import Page from '../components/Page.jsx';
 import Seo from '../components/Seo.jsx';
 import PageHero from '../components/PageHero.jsx';
+import SupportExplorer from '../components/SupportExplorer.jsx';
+import { useInViewOnce } from '../hooks/motion.js';
 import { site, images } from '../config/site.js';
 import './pages.css';
+
+/*
+ * For organisations
+ * Structure comes from typography, hairlines, spacing and background
+ * shifts (no icons, no boxed cards). Background rhythm:
+ *   hero (photo) · intro (white) · ESG (pale green) · explorer (dark green)
+ *   · audiences (deeper green) · closing band (pale green)
+ */
 
 const esg = [
   {
@@ -27,23 +33,21 @@ const esg = [
   },
 ];
 
-const support = [
-  { icon: Radar, title: 'Environmental monitoring', text: 'Support the monitoring of forest landscapes and environmental conditions.' },
-  { icon: Map, title: 'Geospatial insights', text: 'Use spatial information to understand environmental conditions and changes across locations.' },
-  { icon: Sprout, title: 'Restoration visibility', text: 'Help organisations and restoration partners track and communicate environmental restoration activities.' },
-  { icon: FileBarChart, title: 'ESG and sustainability reporting support', text: 'Provide relevant environmental insights that can contribute to sustainability disclosures, monitoring frameworks and evidence-based reporting.' },
-];
-
 const audiences = [
-  { icon: Briefcase, label: 'Corporates and ESG teams' },
-  { icon: HeartHandshake, label: 'NGOs and conservation organisations' },
-  { icon: Trees, label: 'Forest and restoration partners' },
-  { icon: Landmark, label: 'County governments and public institutions' },
-  { icon: Globe2, label: 'Development partners and sustainability programmes' },
-  { icon: Microscope, label: 'Researchers and environmental practitioners' },
+  'Corporates and ESG teams',
+  'NGOs and conservation organisations',
+  'Forest and restoration partners',
+  'County governments and public institutions',
+  'Development partners and sustainability programmes',
+  'Researchers and environmental practitioners',
 ];
 
 export default function Organisations() {
+  const [introRef, introIn] = useInViewOnce(0.3);
+  const [esgRef, esgIn] = useInViewOnce(0.2);
+  const [audRef, audIn] = useInViewOnce(0.2);
+  const [ctaRef, ctaIn] = useInViewOnce(0.3);
+
   return (
     <Page>
       <Seo
@@ -51,32 +55,34 @@ export default function Organisations() {
         description="JuaMsitu helps companies, NGOs, county governments and development partners connect environmental data with sustainability decisions, monitoring and ESG reporting."
       />
 
+      {/* 1. Hero: headline, paragraph, then buttons, ~150 ms apart */}
       <PageHero
         image={images.aerial}
+        animated
+        emphasis
         title="Turn environmental responsibility into measurable insight."
         lead="Sustainability commitments matter. But meaningful progress requires reliable environmental information, consistent monitoring and evidence that supports transparent reporting."
       >
         <div className="btn-row">
-          <Link to="/organisations/waitlist" className="btn btn--sun">
-            <UserPlus aria-hidden="true" /> Create an account
-          </Link>
+          <Link to="/organisations/waitlist" className="btn btn--sun">Create an account</Link>
           <a href={site.bookingUrl} target="_blank" rel="noreferrer" className="btn btn--ghost-light">
-            <CalendarDays aria-hidden="true" /> Book a call
+            Book a call
           </a>
         </div>
       </PageHero>
 
-      {/* Intro */}
-      <section className="section">
-        <div className="container">
-          <p className="org-intro">
+      {/* 2. Intro: large pull statement */}
+      <section className="section org-pull">
+        <div className={`container ${introIn ? 'is-in' : ''}`} ref={introRef}>
+          <span className="accent-line rv--line org-pull__accent" aria-hidden="true" />
+          <p className="org-pull__text rv" style={{ '--d': '120ms' }}>
             JuaMsitu aims to help organisations connect environmental data with the decisions, actions
             and reporting that shape a more sustainable future.
           </p>
         </div>
       </section>
 
-      {/* ESG explained */}
+      {/* 3. ESG: three open columns, then an editorial block */}
       <section className="section section--mist">
         <div className="container">
           <div className="section-head">
@@ -86,22 +92,24 @@ export default function Organisations() {
             </p>
           </div>
 
-          <div className="esg">
-            {esg.map((e) => (
-              <div className="esg__item" key={e.letter}>
-                <span className="esg__letter" aria-hidden="true">{e.letter}</span>
-                <h3>{e.title}</h3>
-                <p>{e.text}</p>
+          <dl className={`esg-cols ${esgIn ? 'is-in' : ''}`} ref={esgRef}>
+            {esg.map((e, i) => (
+              <div className="esg-col rv" key={e.letter} style={{ '--d': `${i * 120}ms` }}>
+                <span className="esg-col__letter" aria-hidden="true">{e.letter}</span>
+                <dt className="esg-col__label">{e.title}</dt>
+                <dd className="esg-col__text">{e.text}</dd>
               </div>
             ))}
-          </div>
+          </dl>
 
-          <div className="why-monitor">
-            <h3>Why environmental monitoring matters</h3>
-            <div>
+          <div className="monitor">
+            <h3 className="monitor__title">Why environmental monitoring matters</h3>
+            <div className="monitor__body">
               <p>
-                Responsible business depends on knowing what is actually happening on the ground. A
-                sustainability strategy is only as strong as the information behind it, and environmental
+                <span className="monitor__lead">
+                  Responsible business depends on knowing what is actually happening on the ground.
+                </span>{' '}
+                A sustainability strategy is only as strong as the information behind it, and environmental
                 conditions such as forest cover and vegetation health can change from season to season.
               </p>
               <p>
@@ -115,63 +123,46 @@ export default function Organisations() {
         </div>
       </section>
 
-      {/* How JuaMsitu can support */}
-      <section className="section">
+      {/* 4. Tabbed explorer (accordion on mobile) */}
+      <section className="section section--dark sx-section">
         <div className="container">
           <div className="section-head">
-            <h2>How JuaMsitu can support organisations</h2>
+            <h2>How JuaMsitu supports organisations</h2>
             <p className="lead">
-              The platform is being developed in stages. Talk to us about where it can help your work today.
+              The platform is being developed in stages. Choose an area to see the question it is designed
+              to help you answer, then talk to us about where it fits your work today.
             </p>
           </div>
-          <div className="support-grid">
-            {support.map((s) => (
-              <article className="support-card" key={s.title}>
-                <span className="support-card__icon"><s.icon aria-hidden="true" /></span>
-                <div>
-                  <h3>{s.title}</h3>
-                  <p>{s.text}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+          <SupportExplorer />
         </div>
       </section>
 
-      {/* Audiences */}
-      <section className="section section--dark">
+      {/* 5. Audiences: two-column list of large lines */}
+      <section className="section aud">
         <div className="container">
-          <div className="section-head">
-            <h2>Who can work with JuaMsitu?</h2>
-          </div>
-          <ul className="audiences">
-            {audiences.map((a) => (
-              <li key={a.label}><a.icon aria-hidden="true" />{a.label}</li>
+          <h2 className="aud__title">Who can work with JuaMsitu?</h2>
+          <ul className={`aud__list ${audIn ? 'is-in' : ''}`} ref={audRef}>
+            {audiences.map((a, i) => (
+              <li className="aud__item rv" key={a} style={{ '--d': `${i * 80}ms` }}>{a}</li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* Work with us */}
-      <section className="section">
-        <div className="container">
-          <div className="cta-band">
-            <div>
-              <h2>Let's make environmental impact more visible.</h2>
-              <p>
-                Whether you are strengthening your sustainability strategy, supporting restoration or
-                looking for better ways to understand environmental change, let's explore how JuaMsitu
-                can support your work.
-              </p>
-            </div>
-            <div className="btn-row">
-              <Link to="/organisations/waitlist" className="btn btn--teal">
-                <UserPlus aria-hidden="true" /> Create an account
-              </Link>
-              <a href={site.bookingUrl} target="_blank" rel="noreferrer" className="btn btn--ghost">
-                <CalendarDays aria-hidden="true" /> Book a call
-              </a>
-            </div>
+      {/* 6. Closing call to action: full-width pale green band */}
+      <section className="section section--mist org-cta">
+        <div className={`container ${ctaIn ? 'is-in' : ''}`} ref={ctaRef}>
+          <h2 className="org-cta__title rv">Let's make environmental impact more visible.</h2>
+          <p className="org-cta__text rv" style={{ '--d': '120ms' }}>
+            Whether you are strengthening your sustainability strategy, supporting restoration or
+            looking for better ways to understand environmental change, let's explore how JuaMsitu
+            can support your work.
+          </p>
+          <div className="btn-row rv" style={{ '--d': '240ms' }}>
+            <Link to="/organisations/waitlist" className="btn btn--sun">Create an account</Link>
+            <a href={site.bookingUrl} target="_blank" rel="noreferrer" className="btn btn--ghost">
+              Book a call
+            </a>
           </div>
         </div>
       </section>

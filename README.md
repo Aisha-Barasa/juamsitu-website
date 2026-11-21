@@ -27,11 +27,54 @@ Almost everything you will want to edit is in **`src/config/site.js`**:
 | M-Pesa till and suggested amounts | `site.mpesa` |
 | Waitlist form service | `site.waitlistEndpoint` |
 | Social media profiles | `site.socials` (empty links are hidden) |
-| Photos | `images` |
+| Photos and hero video file paths | `images`, `images.heroVideo` |
 | Capability status (prototype, in development, planned) | `capabilities` |
-| Team profiles and partner logos | `team`, `partners` |
 
 Colours and fonts live at the top of `src/styles/global.css`.
+
+## Hero background video
+
+The homepage hero plays a looping video over the forest photo. Until the video files exist, it simply shows the photo, so nothing breaks.
+
+**Where the files go:** `public/videos/`, with exactly these names:
+
+| File | Used for |
+| --- | --- |
+| `hero-forest-1080.webm` | Desktop (tried first) |
+| `hero-forest-1080.mp4` | Desktop fallback (Safari) |
+| `hero-forest-720.webm` | Screens under 768px wide |
+| `hero-forest-720.mp4` | Small-screen fallback |
+
+**Targets:** 8 to 12 seconds, no audio, under 5 MB per 1080p file (720p files should be much smaller).
+
+**Compressing with ffmpeg** (free, ffmpeg.org). Start from your edited clip, `source.mp4`:
+
+```bash
+# 1080p WebM (VP9)
+ffmpeg -i source.mp4 -an -vf "scale=-2:1080,fps=24" -c:v libvpx-vp9 -b:v 0 -crf 36 -row-mt 1 public/videos/hero-forest-1080.webm
+
+# 1080p MP4 (H.264)
+ffmpeg -i source.mp4 -an -vf "scale=-2:1080,fps=24" -c:v libx264 -crf 28 -preset slow -pix_fmt yuv420p -movflags +faststart public/videos/hero-forest-1080.mp4
+
+# 720p versions for small screens
+ffmpeg -i source.mp4 -an -vf "scale=-2:720,fps=24" -c:v libvpx-vp9 -b:v 0 -crf 38 -row-mt 1 public/videos/hero-forest-720.webm
+ffmpeg -i source.mp4 -an -vf "scale=-2:720,fps=24" -c:v libx264 -crf 30 -preset slow -pix_fmt yuv420p -movflags +faststart public/videos/hero-forest-720.mp4
+```
+
+If a 1080p file comes out over 5 MB, raise the `-crf` number by 2 and try again.
+
+**A seamless loop.** The site already fades the video out to the poster photo in its last 0.7 seconds and back in as it restarts. For the smoothest result, end the clip on (or close to) the aerial canopy shown in the poster photo. To bake a crossfade into the file itself, blend the last second into the first:
+
+```bash
+# For a 10-second clip: crossfade its final 1 s into its opening 1 s
+ffmpeg -i source.mp4 -filter_complex "[0:v]split[a][b];[a]trim=1:10,setpts=PTS-STARTPTS[main];[b]trim=0:1,setpts=PTS-STARTPTS[head];[main][head]xfade=transition=fade:duration=1:offset=8[v]" -map "[v]" -an looped.mp4
+```
+
+Then compress `looped.mp4` with the commands above.
+
+**Matching the poster.** The poster is the hero photo set in `images.hero` in `src/config/site.js`. If your video ends on a different shot, export a still of its last frame, save it as `public/images/hero-poster.jpg` and point `images.hero.src` to `/images/hero-poster.jpg`.
+
+**Behaviour built in:** reduced-motion users and Save-Data / 2G connections see the photo only; screens under 768px get the 720p files; a pause/play button appears bottom-right once the video plays.
 
 ## Connecting the waitlist form
 

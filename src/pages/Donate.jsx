@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, HandHeart, ShieldCheck, Smartphone } from 'lucide-react';
+import { Copy, Check, HandHeart } from 'lucide-react';
 import Page from '../components/Page.jsx';
 import Seo from '../components/Seo.jsx';
 import PageHero from '../components/PageHero.jsx';
@@ -134,16 +134,6 @@ export default function Donate() {
                 </span></li>
                 <li><span>Confirm the payment details before completing the transaction.</span></li>
               </ol>
-
-              <p className="processing-note">
-                <Smartphone aria-hidden="true" />
-                Donations are processed by M-Pesa. This website does not process payments directly or
-                collect any payment details. Keep your M-Pesa confirmation message as your receipt.
-              </p>
-              <p className="processing-note">
-                <ShieldCheck aria-hidden="true" />
-                Before you confirm, check that the till number on your phone matches {till}.
-              </p>
             </div>
           </div>
         </div>

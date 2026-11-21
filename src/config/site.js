@@ -75,6 +75,22 @@ export const images = {
     caption: 'Kimana, Kenya',
     credit: 'Photo by Mariola Grobelska on Unsplash',
   },
+  /**
+   * Hero background video. Drop the files in /public/videos with these
+   * names (see README for how to compress them). Until they exist, the
+   * hero simply shows the hero photo above as a still image.
+   */
+  heroVideo: {
+    hd: {
+      webm: '/videos/hero-forest-1080.webm',
+      mp4: '/videos/hero-forest-1080.mp4',
+    },
+    // Lighter version for screens under 768px wide
+    sd: {
+      webm: '/videos/hero-forest-720.webm',
+      mp4: '/videos/hero-forest-720.mp4',
+    },
+  },
   comingSoon: {
     src: '/images/coming-soon.jpg',
     alt: 'Illustrated globe wrapped in forest with a glowing ring reading coming soon',
@@ -99,37 +115,24 @@ export const capabilities = [
     id: '01',
     title: 'Monitor forest health',
     text: 'Explore forest conditions through geospatial information and vegetation indicators, including NDVI-based insights.',
-    icon: 'Leaf',
     status: 'prototype',
   },
   {
     id: '02',
     title: 'Understand environmental change',
     text: 'Bring environmental information into context to better understand changes in forest landscapes and surrounding ecosystems.',
-    icon: 'Layers',
     status: 'development',
   },
   {
     id: '03',
     title: 'Make informed decisions',
     text: 'Translate environmental observations into insights that can support conservation planning, restoration priorities and environmental management.',
-    icon: 'Compass',
     status: 'planned',
   },
   {
     id: '04',
     title: 'Support accountability',
     text: 'Help organisations and stakeholders strengthen environmental monitoring, sustainability reporting and evidence-based decision-making.',
-    icon: 'ShieldCheck',
     status: 'planned',
   },
-];
-
-/** Team and partners. Add verified entries only. */
-export const team = [
-  // { name: 'Full name', role: 'Role', photo: '/images/team/name.jpg', bio: 'Short verified bio' },
-];
-
-export const partners = [
-  // { name: 'Partner name', logo: '/images/partners/logo.png', url: 'https://...' },
 ];

@@ -352,3 +352,53 @@ a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==================================================================
+   Reveal utilities (used with the hooks in src/hooks/motion.js)
+   Add .rv to an element; it animates when it or an ancestor gets .is-in.
+   Delay per element: style={{ '--d': '120ms' }}
+   Only transform and opacity are animated.
+   ================================================================== */
+
+.rv {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transition-delay: var(--d, 0ms);
+}
+
+.rv--left { transform: translateX(-18px); }
+
+/* A line that draws in from the left */
+.rv--line {
+  opacity: 1;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.8s var(--ease);
+  transition-delay: var(--d, 0ms);
+}
+
+.is-in .rv,
+.rv.is-in,
+.is-in .rv--line {
+  opacity: 1;
+  transform: none;
+}
+
+/* Short yellow accent line used under or above headings */
+.accent-line {
+  display: block;
+  width: 56px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--sunbeam);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv,
+  .rv--line {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

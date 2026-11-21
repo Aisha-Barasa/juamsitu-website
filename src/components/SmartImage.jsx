@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
 /**
- * Image with lazy loading and a forest-coloured fallback,
+ * Image with lazy loading, optional explicit width/height (to avoid
+ * layout shift) and a forest-coloured fallback,
  * so a failed download never shows a broken image icon.
  */
-export default function SmartImage({ src, alt, className = '', eager = false, style }) {
+export default function SmartImage({ src, alt, className = '', eager = false, style, width, height }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {
@@ -17,6 +18,8 @@ export default function SmartImage({ src, alt, className = '', eager = false, st
       alt={alt}
       className={className}
       style={style}
+      width={width}
+      height={height}
       loading={eager ? 'eager' : 'lazy'}
       fetchpriority={eager ? 'high' : undefined}
       decoding="async"

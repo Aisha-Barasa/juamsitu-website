@@ -1,21 +1,73 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { CircleDot, CalendarDays } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { CalendarDays } from 'lucide-react';
 import Page from '../components/Page.jsx';
 import Seo from '../components/Seo.jsx';
 import PageHero from '../components/PageHero.jsx';
 import SmartImage from '../components/SmartImage.jsx';
 import Graticule from '../components/Graticule.jsx';
-import { site, images, team, partners } from '../config/site.js';
+import { useInViewOnce, usePrefersReducedMotion } from '../hooks/motion.js';
+import { site, images } from '../config/site.js';
 import './pages.css';
 
-const problems = [
-  'Environmental information can be difficult to access and interpret.',
-  'Forest monitoring needs consistent and accessible insights.',
-  'Restoration and conservation decisions benefit from reliable evidence.',
-  'Organisations need stronger ways to understand and communicate environmental progress.',
+/*
+ * Why JuaMsitu exists: each point has a short lead phrase (new, drawn from
+ * its sentence) followed by the original sentence, unchanged.
+ */
+const reasons = [
+  {
+    lead: 'Information is hard to access or interpret',
+    text: 'Environmental information can be difficult to access and interpret.',
+  },
+  {
+    lead: 'Monitoring needs consistent insight',
+    text: 'Forest monitoring needs consistent and accessible insights.',
+  },
+  {
+    lead: 'Decisions need reliable evidence',
+    text: 'Restoration and conservation decisions benefit from reliable evidence.',
+  },
+  {
+    lead: 'Progress must be communicated clearly',
+    text: 'Organisations need stronger ways to understand and communicate environmental progress.',
+  },
 ];
 
+/** Vertical timeline whose line draws in as the visitor scrolls. */
+function ReasonsTimeline() {
+  const listRef = useRef(null);
+  const reduced = usePrefersReducedMotion();
+  const [revealRef, inView] = useInViewOnce(0.15);
+  const { scrollYProgress } = useScroll({ target: listRef, offset: ['start 85%', 'end 55%'] });
+  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  return (
+    <div ref={revealRef} className={inView ? 'is-in' : ''}>
+      <ol className="timeline" ref={listRef}>
+        {/* Track and the line that draws over it (transform: scaleY only) */}
+        <span className="timeline__track" aria-hidden="true" />
+        <motion.span
+          className="timeline__line"
+          aria-hidden="true"
+          style={{ scaleY: reduced ? 1 : lineScale }}
+        />
+        {reasons.map((r, i) => (
+          <li className="timeline__item rv" key={r.lead} style={{ '--d': `${i * 120}ms` }}>
+            <span className="timeline__dot" aria-hidden="true" />
+            <h3 className="timeline__lead">{r.lead}</h3>
+            <p className="timeline__text">{r.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 export default function About() {
+  const [whyHeadRef, whyHeadIn] = useInViewOnce(0.25);
+  const [missionRef, missionIn] = useInViewOnce(0.25);
+
   return (
     <Page>
       <Seo
@@ -23,43 +75,44 @@ export default function About() {
         description="JuaMsitu exists to make environmental intelligence more accessible and useful, supporting better decisions for forests, ecosystems and the communities that depend on them."
       />
 
+      {/* Hero: headline fades up, then the paragraph */}
       <PageHero
         image={images.hero}
+        animated
+        emphasis
         title="A future where every forest can be understood, valued and protected."
         lead="JuaMsitu means 'know the forest' in Swahili. It's an environmental intelligence platform that connects data, people and action."
       />
 
-      {/* Problem */}
+      {/* Why JuaMsitu exists: editorial timeline */}
       <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <h2>Why JuaMsitu exists</h2>
-            <p className="lead">
+        <div className="container why-exists">
+          <div className={`why-exists__head ${whyHeadIn ? 'is-in' : ''}`} ref={whyHeadRef}>
+            <h2 className="rv">Why JuaMsitu exists</h2>
+            <span className="accent-line rv--line why-exists__accent" style={{ '--d': '120ms' }} aria-hidden="true" />
+            <p className="why-exists__intro rv" style={{ '--d': '240ms' }}>
               Forests are more than landscapes. They are living systems that need to be understood,
               monitored and protected. Today, that is harder than it should be.
             </p>
           </div>
-          <ul className="problems">
-            {problems.map((p) => (
-              <li key={p}><CircleDot aria-hidden="true" />{p}</li>
-            ))}
-          </ul>
+          <ReasonsTimeline />
         </div>
       </section>
 
       {/* Mission and vision */}
       <section className="section section--dark">
-        <div className="container statements">
-          <div className="statement">
+        <div className={`container statements ${missionIn ? 'is-in' : ''}`} ref={missionRef}>
+          <div className="statement rv">
             <p className="statement__label">Our mission</p>
-            <p>
+            <p className="statement__text">
               To make environmental intelligence more accessible and useful, supporting better decisions for
               forests, ecosystems and the communities that depend on them.
             </p>
           </div>
-          <div className="statement">
+          <span className="statements__divider" aria-hidden="true" />
+          <div className="statement rv" style={{ '--d': '150ms' }}>
             <p className="statement__label">Our vision</p>
-            <p>
+            <p className="statement__text">
               A future where environmental data empowers people and institutions to protect the natural
               systems that sustain us.
             </p>
@@ -91,53 +144,8 @@ export default function About() {
         </div>
       </section>
 
-      {/* People and partnerships */}
-      <section className="section section--mist">
-        <div className="container">
-          <div className="section-head">
-            <h2>The people and partnerships behind JuaMsitu</h2>
-            <p className="lead">
-              JuaMsitu is built with people who care about forests and the communities around them.
-            </p>
-          </div>
-
-          {/* Add verified team members in src/config/site.js */}
-          {team.length > 0 ? (
-            <div className="people-grid">
-              {team.map((m) => (
-                <article className="person" key={m.name}>
-                  {m.photo && <img src={m.photo} alt={m.name} loading="lazy" />}
-                  <h3>{m.name}</h3>
-                  <p>{m.role}</p>
-                  {m.bio && <p>{m.bio}</p>}
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="placeholder-box">
-              <p>Team profiles are coming soon.</p>
-              <p>
-                Interested in partnering with us?{' '}
-                <a href={`mailto:${site.email}`}>Email {site.email}</a> or{' '}
-                <a href={site.bookingUrl} target="_blank" rel="noreferrer">book a call</a>.
-              </p>
-            </div>
-          )}
-
-          {/* Add verified partner logos in src/config/site.js */}
-          {partners.length > 0 && (
-            <div className="partner-logos" style={{ marginTop: '3rem' }}>
-              {partners.map((p) => (
-                <a key={p.name} href={p.url} target="_blank" rel="noreferrer">
-                  <img src={p.logo} alt={p.name} loading="lazy" />
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="section">
+      {/* Follows another light section, so it skips its own top padding */}
+      <section className="section section--continue">
         <div className="container">
           <div className="cta-band">
             <div>
